@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom Café — Menu & Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fdf8f2;
+    --warm-white: #fffcf8;
+    --blush: #f2e0d5;
+    --peach: #e8c9b5;
+    --terracotta: #c4896a;
+    --clay: #a0634a;
+    --forest: #5a7a5e;
+    --sage: #8bab8f;
+    --gold: #c9a96e;
+    --text-dark: #2c1f18;
+    --text-mid: #5c4033;
+    --text-light: #8c7060;
+    --border: rgba(196,137,106,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--cream);
+    color: var(--text-dark);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px 80px;
+    position: relative;
+    background: radial-gradient(ellipse 80% 60% at 50% 30%, #f5e4d4 0%, var(--cream) 70%);
+    overflow: hidden;
+  }
+
+  .hero-deco { position: absolute; border-radius: 50%; opacity: 0.35; }
+  .hd1 { width:480px;height:480px;background:radial-gradient(circle,#e8c9b5,transparent 70%);top:-120px;left:-120px; }
+  .hd2 { width:320px;height:320px;background:radial-gradient(circle,#c4e0c8,transparent 70%);bottom:-60px;right:-60px; }
+  .hd3 { width:200px;height:200px;background:radial-gradient(circle,#c9a96e44,transparent 70%);top:40%;right:10%; }
+
+  .tag {
+    display: inline-block;
+    font-weight: 500;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    background: rgba(196,137,106,0.12);
+    border: 1px solid var(--border);
+    padding: 6px 18px;
+    border-radius: 50px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.2rem, 9vw, 7rem);
+    font-weight: 400;
+    line-height: 1.05;
+    animation: fadeUp 0.9s 0.1s ease both;
+  }
+  .hero h1 em { font-style: italic; color: var(--terracotta); }
+
+  .hero-sub {
+    margin-top: 20px;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+    color: var(--text-light);
+    max-width: 400px;
+    line-height: 1.8;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+
+  .hero-divider {
+    margin: 32px auto 0;
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--terracotta), transparent);
+    animation: fadeUp 1s 0.3s ease both;
+  }
+
+  /* STICKY TAB BAR */
+  .tab-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(253,248,242,0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    animation: fadeUp 1s 0.4s ease both;
+  }
+
+  .tab-bar-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-bar-inner::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 18px 22px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+    background: none;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--terracotta); }
+  .tab-btn.active {
+    color: var(--terracotta);
+    border-bottom-color: var(--terracotta);
+    font-weight: 500;
+  }
+
+  /* MENU PANELS */
+  .menu-panel {
+    display: none;
+    padding: 72px 24px 100px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .menu-panel.active {
+    display: block;
+    animation: panelIn 0.4s ease both;
+  }
+
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-header { text-align: center; margin-bottom: 56px; }
+
+  .panel-emoji {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .panel-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+  }
+  .panel-title em { font-style: italic; color: var(--terracotta); }
+
+  .panel-desc {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+  }
+
+  .panel-divider {
+    width: 50px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--terracotta), transparent);
+    margin: 20px auto 0;
+  }
+
+  /* CARDS */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    position: relative;
+    animation: cardIn 0.45s ease both;
+  }
+
+  .card:nth-child(1){animation-delay:.04s}
+  .card:nth-child(2){animation-delay:.10s}
+  .card:nth-child(3){animation-delay:.16s}
+  .card:nth-child(4){animation-delay:.22s}
+  .card:nth-child(5){animation-delay:.28s}
+  .card:nth-child(6){animation-delay:.34s}
+  .card:nth-child(7){animation-delay:.40s}
+  .card:nth-child(8){animation-delay:.46s}
+
+  @keyframes cardIn {
+    from { opacity:0; transform:translateY(22px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 48px rgba(196,137,106,0.15);
+  }
+
+  .card.featured {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #fffdf8 0%, #fdf4e8 100%);
+  }
+
+  .card.featured::before {
+    content: '★ Signature';
+    position: absolute;
+    top: 14px; right: 14px;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,169,110,0.12);
+    border: 1px solid rgba(201,169,110,0.35);
+    padding: 4px 10px;
+    border-radius: 50px;
+  }
+
+  .card-icon {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+  }
+
+  .card-body { padding: 20px 24px 24px; }
+
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+  }
+
+  .card-desc {
+    font-size: 0.83rem;
+    color: var(--text-light);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    color: var(--terracotta);
+  }
+
+  .card-price .currency {
+    font-size: 0.9rem;
+    vertical-align: super;
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+  }
+
+  .card-badge {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 50px;
+  }
+
+  .badge-popular { background:rgba(90,122,94,0.1); color:var(--forest); }
+  .badge-new     { background:rgba(196,137,106,0.1); color:var(--terracotta); }
+  .badge-premium { background:rgba(201,169,110,0.1); color:#9e7e3a; }
+  .badge-hot     { background:rgba(200,80,60,0.1); color:#b84e38; }
+
+  /* Showcase strip */
+  .showcase-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  @media(max-width:640px){ .showcase-strip{grid-template-columns:1fr;} }
+
+  .sc-card {
+    border-radius: 20px;
+    padding: 36px 32px;
+    animation: cardIn 0.5s 0.02s ease both;
+  }
+  .sc-card.green { background:linear-gradient(135deg,#d0ecd8,#b8e0c0); }
+  .sc-card.peach { background:linear-gradient(135deg,#f5e8d8,#edddc8); }
+
+  .sc-card .sc-emoji { font-size:3.2rem; margin-bottom:14px; display:block; }
+  .sc-card h3 { font-family:'Playfair Display',serif; font-size:1.45rem; font-weight:400; margin-bottom:10px; color:var(--text-dark); }
+  .sc-card p { font-size:0.83rem; color:var(--text-mid); line-height:1.7; margin-bottom:16px; }
+  .sc-card .sc-price { font-family:'Playfair Display',serif; font-size:2rem; color:var(--terracotta); }
+
+  /* FOOTER */
+  footer {
+    background: var(--text-dark);
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    padding: 48px 24px;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+  }
+
+  .footer-brand { font-family:'Playfair Display',serif; font-size:1.8rem; color:#fff; margin-bottom:8px; }
+  .footer-tagline { margin-bottom:24px; font-size:0.75rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--terracotta); }
+  .footer-info { display:flex; gap:28px; justify-content:center; flex-wrap:wrap; margin-bottom:28px; }
+  .footer-divider { width:40px; height:1px; background:rgba(196,137,106,0.4); margin:0 auto 20px; }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(28px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  @media(max-width:600px){
+    .menu-grid{grid-template-columns:1fr;}
+    .tab-btn{padding:16px 14px;font-size:0.72rem;}
+    .sc-card{padding:28px 22px;}
+  }
+
+  /* ═══ ORDER SYSTEM ═══ */
+  .add-to-order-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 8px 0;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--terracotta);
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: all 0.2s ease;
+  }
+  .add-to-order-btn:hover {
+    background: var(--terracotta);
+    color: #fff;
+    border-color: var(--terracotta);
+  }
+
+  .cart-fab {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 200;
+    background: var(--terracotta);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 24px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 28px rgba(196,137,106,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .cart-fab:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(196,137,106,0.45); }
+  .cart-fab.visible { display: flex; }
+  .cart-fab-count {
+    background: #fff;
+    color: var(--terracotta);
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .cart-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,31,24,0.5);
+    z-index: 300;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .cart-overlay.open { display: flex; }
+
+  .cart-drawer {
+    background: var(--warm-white);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 28px 40px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .cart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text-dark);
+  }
+  .cart-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--text-light);
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .cart-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-item-name { flex: 1; font-size: 0.9rem; color: var(--text-dark); }
+  .cart-qty-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--blush);
+    border-radius: 50px;
+    padding: 4px 12px;
+  }
+  .cart-qty-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: var(--clay);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+  }
+  .cart-qty-num {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    min-width: 16px;
+    text-align: center;
+  }
+  .cart-item-price { font-size: 0.9rem; color: var(--terracotta); min-width: 64px; text-align: right; }
+
+  .cart-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--peach);
+  }
+  .cart-total-label { font-size: 1rem; color: var(--text-mid); }
+  .cart-total-amount { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--terracotta); }
+
+  .cart-place-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: var(--terracotta);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s ease;
+  }
+  .cart-place-btn:hover { background: var(--clay); }
+
+  .cart-clear-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    cursor: pointer;
+  }
+  .cart-clear-btn:hover { color: var(--clay); border-color: var(--clay); }
+
+  .cart-empty-msg {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.88rem;
+    padding: 28px 0;
+  }
+
+  /* Receipt modal */
+  .receipt-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,31,24,0.5);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .receipt-overlay.open { display: flex; }
+  .receipt-box {
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .receipt-header { text-align: center; margin-bottom: 20px; }
+  .receipt-brand { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-dark); }
+  .receipt-sub { font-size: 0.78rem; color: var(--text-light); letter-spacing: 0.1em; margin-top: 4px; }
+  .receipt-confirmed {
+    display: inline-block;
+    background: rgba(90,122,94,0.12);
+    color: var(--forest);
+    font-size: 0.75rem;
+    padding: 5px 16px;
+    border-radius: 50px;
+    font-weight: 500;
+    margin-top: 12px;
+    letter-spacing: 0.08em;
+  }
+  .receipt-divider { height: 1px; background: var(--border); margin: 16px 0; }
+  .receipt-order-num { font-size: 0.78rem; color: var(--text-light); margin-bottom: 14px; }
+  .receipt-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .receipt-line-name { font-size: 0.88rem; color: var(--text-dark); flex: 1; }
+  .receipt-line-qty { font-size: 0.8rem; color: var(--text-light); }
+  .receipt-line-price { font-size: 0.88rem; color: var(--terracotta); }
+  .receipt-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    background: var(--blush);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  .receipt-total-label { font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
+  .receipt-total-amt { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--terracotta); }
+  .receipt-footer-msg { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 18px; letter-spacing: 0.05em; }
+  .receipt-close-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px;
+    background: var(--terracotta);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+  }
+  .receipt-close-btn:hover { background: var(--clay); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-deco hd1"></div>
+  <div class="hero-deco hd2"></div>
+  <div class="hero-deco hd3"></div>
+  <span class="tag">Est. 2024 · Tokyo</span>
+  <h1>Bloom <em>Café</em></h1>
+  <p class="hero-sub">Where every sip is a moment of warmth. Crafted drinks, fresh bites, and quiet corners.</p>
+  <div class="hero-divider"></div>
+</section>
+
+<!-- STICKY TABS -->
+<nav class="tab-bar">
+  <div class="tab-bar-inner">
+    <button class="tab-btn active" data-tab="coffee">☕ Coffee</button>
+    <button class="tab-btn" data-tab="matcha">🍵 Matcha</button>
+    <button class="tab-btn" data-tab="mojito">🍹 Mojito</button>
+    <button class="tab-btn" data-tab="drinks">🧋 Drinks</button>
+    <button class="tab-btn" data-tab="food">🥐 Food</button>
+    <button class="tab-btn" data-tab="dessert">🍰 Desserts</button>
+  </div>
+</nav>
+
+<!-- ════ COFFEE ════ -->
+<div class="menu-panel active" id="panel-coffee">
+  <div class="panel-header">
+    <span class="panel-emoji">☕</span>
+    <h2 class="panel-title">Coffee <em>Bar</em></h2>
+    <p class="panel-desc">Single-origin beans, expert craft, and every cup made with intention.</p>
+    <div class="panel-divider"></div>
+  </div>
+  <div class="menu-grid">
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f5e4d0,#eecfb0);">☕</div>
+      <div class="card-body">
+        <div class="card-name">Black Gold Espresso</div>
+        <div class="card-desc">Triple-extracted single-origin Ethiopian beans. Dense, syrupy, with notes of dark chocolate and jasmine. Our most premium espresso.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,800</div>
+          <span class="card-badge badge-premium">Premium</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Black Gold Espresso', 1800)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f0e8dc,#e8d5c0);">🌟</div>
+      <div class="card-body">
+        <div class="card-name">Café Latte</div>
+        <div class="card-desc">Velvety espresso with steamed whole milk and a delicate rosette of foam. Classic and comforting.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>780</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Café Latte', 780)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f5ede0,#f0e0c8);">🫧</div>
+      <div class="card-body">
+        <div class="card-name">Cappuccino</div>
+        <div class="card-desc">One-third espresso, one-third milk, one-third cloud-like microfoam. Dusted with Valrhona cocoa powder.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>720</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Cappuccino', 720)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#ede0f0,#dcc8e8);">🦋</div>
+      <div class="card-body">
+        <div class="card-name">Lavender Cloud Latte</div>
+        <div class="card-desc">House-made lavender syrup, oat milk, espresso, topped with butterfly pea blue foam. Instagrammable and delicious.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,200</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Lavender Cloud Latte', 1200)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e8e4d8,#d8d0c0);">🌙</div>
+      <div class="card-body">
+        <div class="card-name">Flat White</div>
+        <div class="card-desc">Double ristretto shots with silky microfoam. Bold, intense, and satisfying every time.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>750</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Flat White', 750)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f5e8d0,#e8c898);">🥂</div>
+      <div class="card-body">
+        <div class="card-name">Gold Honey Cortado</div>
+        <div class="card-desc">Equal parts espresso and warm milk, drizzled with raw wildflower honey and edible gold flakes.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,600</div>
+          <span class="card-badge badge-premium">Premium</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Gold Honey Cortado', 1600)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e8f0f8,#c8e0f0);">🧊</div>
+      <div class="card-body">
+        <div class="card-name">Cold Brew</div>
+        <div class="card-desc">Slow-steeped 18 hours in cold water. Smooth, mellow, and naturally sweet over clear ice.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>820</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Cold Brew', 820)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8f0e8,#f0e0d0);">🍬</div>
+      <div class="card-body">
+        <div class="card-name">Caramel Macchiato</div>
+        <div class="card-desc">Vanilla syrup, steamed milk, espresso shots, and house caramel drizzle. Sweet meets bold.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>900</div>
+          <span class="card-badge badge-hot">Favourite</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Caramel Macchiato', 900)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MATCHA ════ -->
+<div class="menu-panel" id="panel-matcha">
+  <div class="panel-header">
+    <span class="panel-emoji">🍵</span>
+    <h2 class="panel-title">Matcha <em>Collection</em></h2>
+    <p class="panel-desc">Ceremonial-grade Uji matcha sourced directly from Kyoto's finest farms.</p>
+    <div class="panel-divider"></div>
+  </div>
+  <div class="menu-grid">
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#d8edd8,#b8d8b8);">🍵</div>
+      <div class="card-body">
+        <div class="card-name">Grand Matcha Ceremony</div>
+        <div class="card-desc">Ceremonial-grade Uji matcha, whisked tableside, oat milk foam and gold-dusted powder. A true ritual.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,980</div>
+          <span class="card-badge badge-premium">Signature</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Grand Matcha Ceremony', 1980)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e0ede0,#c8e0c8);">🌿</div>
+      <div class="card-body">
+        <div class="card-name">Matcha Latte</div>
+        <div class="card-desc">Premium matcha blended with steamed oat or almond milk. Earthy, creamy, and beautifully balanced.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>880</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Matcha Latte', 880)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#d8e8e0,#c0dcd0);">🧊</div>
+      <div class="card-body">
+        <div class="card-name">Iced Matcha Mist</div>
+        <div class="card-desc">Cold-brew matcha over crystal ice with a float of coconut cream and a pinch of sea salt.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>920</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Iced Matcha Mist', 920)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e8f0d8,#d0e8b8);">🌸</div>
+      <div class="card-body">
+        <div class="card-name">Sakura Matcha Blend</div>
+        <div class="card-desc">Seasonal matcha with cherry blossom syrup, pink sea salt foam, and dried sakura petals.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,450</div>
+          <span class="card-badge badge-new">Seasonal</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Sakura Matcha Blend', 1450)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e0f0d8,#c8e8b8);">🥛</div>
+      <div class="card-body">
+        <div class="card-name">Matcha Hojicha Duo</div>
+        <div class="card-desc">A layered cup of roasted hojicha and vibrant matcha, separated by milk. Two worlds, one glass.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,050</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Matcha Hojicha Duo', 1050)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#d8ece8,#b8e0d8);">🫖</div>
+      <div class="card-body">
+        <div class="card-name">Matcha Sparkling</div>
+        <div class="card-desc">Cold-pressed matcha with yuzu tonic and fresh mint. Fizzy, bright, and wildly refreshing.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>980</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Matcha Sparkling', 980)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MOJITO ════ -->
+<div class="menu-panel" id="panel-mojito">
+  <div class="panel-header">
+    <span class="panel-emoji">🍹</span>
+    <h2 class="panel-title">Mojito <em>Garden</em></h2>
+    <p class="panel-desc">Hand-muddled, freshly poured, and never rushed. Our most celebrated cocktails.</p>
+    <div class="panel-divider"></div>
+  </div>
+  <div class="showcase-strip">
+    <div class="sc-card green">
+      <span class="sc-emoji">🍹</span>
+      <h3>Royal Mint Mojito</h3>
+      <p>Aged white rum, hand-crushed fresh mint, lime, cane sugar, sparkling water, elderflower. Frosted crystal glass.</p>
+      <div class="sc-price">¥2,400</div>
+      <span class="card-badge badge-premium" style="display:inline-block;margin-top:12px;">Most Expensive · Premium</span>
+      <button class="add-to-order-btn" onclick="addToOrder('Royal Mint Mojito', 2400)">+ Add to Order</button>
+    </div>
+    <div class="sc-card peach">
+      <span class="sc-emoji">🍓</span>
+      <h3>Strawberry Rose Mojito</h3>
+      <p>Fresh muddled strawberries, rose water, Bacardi, lime juice, mint, and Champagne float. Utterly luxurious.</p>
+      <div class="sc-price">¥2,200</div>
+      <span class="card-badge badge-premium" style="display:inline-block;margin-top:12px;">Premium · Signature</span>
+      <button class="add-to-order-btn" onclick="addToOrder('Strawberry Rose Mojito', 2200)">+ Add to Order</button>
+    </div>
+  </div>
+  <div class="menu-grid">
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#d8f0e8,#b8e8d0);">🌿</div>
+      <div class="card-body">
+        <div class="card-name">Virgin Bloom Mojito</div>
+        <div class="card-desc">Non-alcoholic. Cucumber, fresh mint, lime, honey syrup, and sparkling yuzu water.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,100</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Virgin Bloom Mojito', 1100)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e8f0d0,#d0e8a8);">🥝</div>
+      <div class="card-body">
+        <div class="card-name">Kiwi Basil Mojito</div>
+        <div class="card-desc">Muddled kiwi, fresh basil, premium rum, lime, soda. An unexpected and glorious combination.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,900</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Kiwi Basil Mojito', 1900)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#ffe0e8,#ffc0d0);">🍉</div>
+      <div class="card-body">
+        <div class="card-name">Watermelon Chill Mojito</div>
+        <div class="card-desc">Fresh watermelon juice, white rum, mint, lime, and a salted rim. Perfect for summer.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,600</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Watermelon Chill Mojito', 1600)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e0d8f8,#c8b8f0);">🫐</div>
+      <div class="card-body">
+        <div class="card-name">Blueberry Lavender Mojito</div>
+        <div class="card-desc">Muddled blueberries, lavender syrup, gin, lime, and tonic. Fragrant and beautiful.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,750</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Blueberry Lavender Mojito', 1750)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ DRINKS ════ -->
+<div class="menu-panel" id="panel-drinks">
+  <div class="panel-header">
+    <span class="panel-emoji">🧋</span>
+    <h2 class="panel-title">More <em>Drinks</em></h2>
+    <p class="panel-desc">From colour-changing magic to boba delights — something for every mood.</p>
+    <div class="panel-divider"></div>
+  </div>
+  <div class="menu-grid">
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#ffe8d8,#ffd0b8);">🧋</div>
+      <div class="card-body">
+        <div class="card-name">Brown Sugar Boba</div>
+        <div class="card-desc">Handmade tapioca pearls slow-cooked in brown sugar caramel, topped with tiger stripe milk tea.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>980</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Brown Sugar Boba', 980)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#ffd8e8,#ffb8d0);">🌺</div>
+      <div class="card-body">
+        <div class="card-name">Hibiscus Fizz</div>
+        <div class="card-desc">Dried hibiscus flowers steeped and mixed with elderflower tonic, fresh lemon, and rose syrup.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>850</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Hibiscus Fizz', 850)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e8d8f8,#d0b8f0);">🦄</div>
+      <div class="card-body">
+        <div class="card-name">Butterfly Pea Lemonade</div>
+        <div class="card-desc">Colour-changing drink — blue butterfly pea tea meets citrus and turns vivid purple. Pure magic.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,350</div>
+          <span class="card-badge badge-premium">Signature</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Butterfly Pea Lemonade', 1350)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#fff0d0,#ffe0a8);">🍋</div>
+      <div class="card-body">
+        <div class="card-name">Yuzu Honey Soda</div>
+        <div class="card-desc">Fresh yuzu juice, raw honey, sparkling Perrier. Light, bright, and quintessentially Japanese.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>780</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Yuzu Honey Soda', 780)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e0f0f8,#c0e0f0);">🍈</div>
+      <div class="card-body">
+        <div class="card-name">Melon Cream Soda</div>
+        <div class="card-desc">A retro Japanese favourite — Hokkaido melon syrup, vanilla ice cream float, and soda water.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>920</div>
+          <span class="card-badge badge-hot">Favourite</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Melon Cream Soda', 920)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8e8d0,#f0d0a8);">☀️</div>
+      <div class="card-body">
+        <div class="card-name">Golden Turmeric Latte</div>
+        <div class="card-desc">Organic turmeric, black pepper, coconut milk, maple syrup, and oat milk foam. Wellness in a mug.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,050</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Golden Turmeric Latte', 1050)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f0f8e8,#d8f0c0);">🥤</div>
+      <div class="card-body">
+        <div class="card-name">Cucumber Mint Cooler</div>
+        <div class="card-desc">Blended cucumber, fresh mint, a splash of lime, and sparkling water. Zero sugar, all refreshment.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>720</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Cucumber Mint Cooler', 720)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8e8f8,#f0d0f0);">🍇</div>
+      <div class="card-body">
+        <div class="card-name">Grape Oolong Soda</div>
+        <div class="card-desc">Cold-brewed Taiwanese oolong, fresh Kyoho grape juice, and sparkling water with a citrus twist.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>880</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Grape Oolong Soda', 880)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ FOOD ════ -->
+<div class="menu-panel" id="panel-food">
+  <div class="panel-header">
+    <span class="panel-emoji">🥐</span>
+    <h2 class="panel-title">Café <em>Kitchen</em></h2>
+    <p class="panel-desc">Fresh, seasonal, and made each morning by our in-house kitchen team.</p>
+    <div class="panel-divider"></div>
+  </div>
+  <div class="menu-grid">
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8f0d8,#f0e0b8);">🥐</div>
+      <div class="card-body">
+        <div class="card-name">Butter Croissant</div>
+        <div class="card-desc">72-hour laminated dough, baked fresh each morning. Golden, flaky, irreplaceable.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>450</div>
+          <span class="card-badge badge-popular">Daily Fresh</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Butter Croissant', 450)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8e8d8,#f0d0b8);">🥞</div>
+      <div class="card-body">
+        <div class="card-name">Soufflé Pancake Stack</div>
+        <div class="card-desc">Jiggly Japanese-style soufflé pancakes, whipped cream, seasonal fruit, and housemade berry compote.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,480</div>
+          <span class="card-badge badge-popular">Fan Favourite</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Soufflé Pancake Stack', 1480)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f0f0d8,#e0e0b8);">🥗</div>
+      <div class="card-body">
+        <div class="card-name">Bloom Garden Salad</div>
+        <div class="card-desc">Seasonal organic leaves, edible flowers, shaved parmesan, candied walnuts, citrus vinaigrette.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,100</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Bloom Garden Salad', 1100)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8d8d8,#f0b8b8);">🫕</div>
+      <div class="card-body">
+        <div class="card-name">Avocado Toast</div>
+        <div class="card-desc">Sourdough, smashed avocado, everything bagel spice, pickled radish, and a soft poached egg.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,250</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Avocado Toast', 1250)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f0e0f8,#e0c8f0);">🥪</div>
+      <div class="card-body">
+        <div class="card-name">Truffle Egg Sandwich</div>
+        <div class="card-desc">Brioche bun, black truffle aioli, slow-cooked egg, aged gruyère, microgreens. An indulgent treat.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,680</div>
+          <span class="card-badge badge-premium">Premium</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Truffle Egg Sandwich', 1680)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8f0e0,#f0e0c0);">🍳</div>
+      <div class="card-body">
+        <div class="card-name">Full Bloom Breakfast</div>
+        <div class="card-desc">Two eggs your way, turkey bacon, grilled mushrooms, roasted tomato, sourdough toast, and fresh OJ.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,900</div>
+          <span class="card-badge badge-hot">Bestseller</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Full Bloom Breakfast', 1900)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#e8f0e0,#d0e8c0);">🥙</div>
+      <div class="card-body">
+        <div class="card-name">Grilled Veggie Wrap</div>
+        <div class="card-desc">Charred peppers, zucchini, feta, hummus, and herb oil in a warm spinach tortilla.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,150</div>
+          <span class="card-badge badge-new">New</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Grilled Veggie Wrap', 1150)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8e8e0,#f0d0c0);">🍝</div>
+      <div class="card-body">
+        <div class="card-name">Tomato Burrata Pasta</div>
+        <div class="card-desc">Fresh tagliolini, slow-roasted cherry tomatoes, whipped burrata, basil oil, and sea salt flakes.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,580</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Tomato Burrata Pasta', 1580)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ DESSERT ════ -->
+<div class="menu-panel" id="panel-dessert">
+  <div class="panel-header">
+    <span class="panel-emoji">🍰</span>
+    <h2 class="panel-title">Sweet <em>Endings</em></h2>
+    <p class="panel-desc">Handcrafted pastries and desserts that make the perfect finale to any visit.</p>
+    <div class="panel-divider"></div>
+  </div>
+  <div class="menu-grid">
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8e0f0,#f0c8e8);">🍰</div>
+      <div class="card-body">
+        <div class="card-name">Matcha Basque Cheesecake</div>
+        <div class="card-desc">Burnt Basque cheesecake infused with ceremonial matcha. Creamy, smoky edges, and vivid green heart.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,100</div>
+          <span class="card-badge badge-popular">Signature</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Matcha Basque Cheesecake', 1100)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8f0d0,#f0e0a8);">🍮</div>
+      <div class="card-body">
+        <div class="card-name">Crème Brûlée</div>
+        <div class="card-desc">Classic vanilla bean custard with a torched caramel crust. Crisp, creamy perfection.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>880</div>
+          <span class="card-badge badge-popular">Classic</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Crème Brûlée', 880)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#d8e8f8,#b8d0f0);">🍫</div>
+      <div class="card-body">
+        <div class="card-name">Valrhona Chocolate Fondant</div>
+        <div class="card-desc">Warm dark chocolate lava cake with Valrhona 70%, sea salt caramel center, and vanilla bean ice cream.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,380</div>
+          <span class="card-badge badge-premium">Premium</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Valrhona Chocolate Fondant', 1380)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f0d8f0,#e0b8e0);">🍇</div>
+      <div class="card-body">
+        <div class="card-name">Berry Pavlova</div>
+        <div class="card-desc">Crisp meringue, whipped cream, fresh berries, and a drizzle of passion fruit. Light and ethereal.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>950</div>
+          <span class="card-badge badge-new">Seasonal</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Berry Pavlova', 950)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8f8d8,#f0f0a8);">🍋</div>
+      <div class="card-body">
+        <div class="card-name">Yuzu Tart</div>
+        <div class="card-desc">Buttery shortcrust shell filled with silky yuzu curd, topped with Italian meringue torched to perfection.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>980</div>
+          <span class="card-badge badge-popular">Popular</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Yuzu Tart', 980)">+ Add to Order</button>
+      </div>
+    </div>
+    <div class="card featured">
+      <div class="card-icon" style="background:linear-gradient(135deg,#f8e8d0,#f0d0a0);">🍯</div>
+      <div class="card-body">
+        <div class="card-name">Honey Mille-Feuille</div>
+        <div class="card-desc">Thousand layers of caramelized puff pastry, wildflower honey cream, and edible gold leaf on top.</div>
+        <div class="card-footer">
+          <div class="card-price"><span class="currency">¥</span>1,280</div>
+          <span class="card-badge badge-premium">Premium</span>
+        </div>
+        <button class="add-to-order-btn" onclick="addToOrder('Honey Mille-Feuille', 1280)">+ Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Bloom Café</div>
+  <div class="footer-tagline">Crafted with love · Tokyo</div>
+  <div class="footer-info">
+    <span>📍 Aoyama, Tokyo</span>
+    <span>⏰ 8:00 AM – 9:00 PM</span>
+    <span>📞 +81 3-0000-0000</span>
+    <span>✉️ hello@bloomcafe.jp</span>
+  </div>
+  <div class="footer-divider"></div>
+  <div>© 2024 Bloom Café. All rights reserved. Made with ♥</div>
+</footer>
+
+<!-- FLOATING CART BUTTON -->
+<button class="cart-fab" id="cartFab" onclick="openCart()">
+  🛒 View Order
+  <span class="cart-fab-count" id="cartCount">0</span>
+</button>
+
+<!-- CART DRAWER OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="handleOverlayClick(event)">
+  <div class="cart-drawer">
+    <div class="cart-header">
+      <span class="cart-title">Your Order</span>
+      <button class="cart-close" onclick="closeCart()">✕</button>
+    </div>
+    <div id="cartItems"><div class="cart-empty-msg">Nothing added yet — browse the menu!</div></div>
+    <div class="cart-total-row" id="cartTotalRow" style="display:none;">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-amount" id="cartTotal">¥0</span>
+    </div>
+    <button class="cart-place-btn" id="placeOrderBtn" style="display:none;" onclick="placeOrder()">Place Order ✓</button>
+    <button class="cart-clear-btn" id="clearBtn" style="display:none;" onclick="clearOrder()">Clear order</button>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="receipt-overlay" id="receiptOverlay">
+  <div class="receipt-box">
+    <div class="receipt-header">
+      <div class="receipt-brand">Bloom Café</div>
+      <div class="receipt-sub">Aoyama, Tokyo · Est. 2024</div>
+      <div class="receipt-confirmed">✓ Order Confirmed</div>
+    </div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-order-num" id="receiptOrderNum"></div>
+    <div id="receiptLines"></div>
+    <div class="receipt-total-row">
+      <span class="receipt-total-label">Total</span>
+      <span class="receipt-total-amt" id="receiptTotal"></span>
+    </div>
+    <div class="receipt-footer-msg">Crafted with love · Thank you for visiting 🌸</div>
+    <button class="receipt-close-btn" onclick="closeReceipt()">Done</button>
+  </div>
+</div>
+
+<script>
+  /* ── Tab switching ── */
+  const tabs   = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.menu-panel');
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+      tabs.forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      panels.forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + target).classList.add('active');
+      window.scrollTo({ top: document.querySelector('.tab-bar').offsetTop, behavior: 'smooth' });
+    });
+  });
+
+  /* ── Order state ── */
+  let order = {};
+  let orderCounter = Math.floor(Math.random() * 900) + 100;
+
+  function addToOrder(name, price) {
+    if (order[name]) {
+      order[name].qty++;
+    } else {
+      order[name] = { name, price, qty: 1 };
+    }
+    renderCart();
+    showFab();
+    flashFab();
+  }
+
+  function changeQty(name, delta) {
+    if (!order[name]) return;
+    order[name].qty += delta;
+    if (order[name].qty <= 0) delete order[name];
+    renderCart();
+    if (Object.keys(order).length === 0) {
+      document.getElementById('cartFab').classList.remove('visible');
+    }
+  }
+
+  function clearOrder() {
+    order = {};
+    renderCart();
+    document.getElementById('cartFab').classList.remove('visible');
+  }
+
+  function showFab() {
+    document.getElementById('cartFab').classList.add('visible');
+  }
+
+  function flashFab() {
+    const fab = document.getElementById('cartFab');
+    fab.style.transform = 'scale(1.1)';
+    setTimeout(() => { fab.style.transform = ''; }, 200);
+  }
+
+  function renderCart() {
+    const keys = Object.keys(order);
+    const totalItems = keys.reduce((s, k) => s + order[k].qty, 0);
+    document.getElementById('cartCount').textContent = totalItems;
+
+    const itemsEl = document.getElementById('cartItems');
+    const totalRowEl = document.getElementById('cartTotalRow');
+    const placeBtn = document.getElementById('placeOrderBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    if (!keys.length) {
+      itemsEl.innerHTML = '<div class="cart-empty-msg">Nothing added yet — browse the menu!</div>';
+      totalRowEl.style.display = 'none';
+      placeBtn.style.display = 'none';
+      clearBtn.style.display = 'none';
+      return;
+    }
+
+    itemsEl.innerHTML = keys.map(k => `
+      <div class="cart-item">
+        <span class="cart-item-name">${order[k].name}</span>
+        <div class="cart-qty-ctrl">
+          <button class="cart-qty-btn" onclick="changeQty('${k.replace(/'/g,"\\'")}', -1)">−</button>
+          <span class="cart-qty-num">${order[k].qty}</span>
+          <button class="cart-qty-btn" onclick="changeQty('${k.replace(/'/g,"\\'")}', 1)">+</button>
+        </div>
+        <span class="cart-item-price">¥${(order[k].price * order[k].qty).toLocaleString()}</span>
+      </div>
+    `).join('');
+
+    const total = keys.reduce((s, k) => s + order[k].price * order[k].qty, 0);
+    document.getElementById('cartTotal').textContent = '¥' + total.toLocaleString();
+    totalRowEl.style.display = 'flex';
+    placeBtn.style.display = 'block';
+    clearBtn.style.display = 'block';
+  }
+
+  function openCart() {
+    document.getElementById('cartOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCart() {
+    document.getElementById('cartOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('cartOverlay')) closeCart();
+  }
+
+  function placeOrder() {
+    const keys = Object.keys(order);
+    if (!keys.length) return;
+
+    const total = keys.reduce((s, k) => s + order[k].price * order[k].qty, 0);
+    const num = 'BC-' + (++orderCounter);
+
+    document.getElementById('receiptOrderNum').textContent = 'Order ' + num + ' · ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('receiptLines').innerHTML = keys.map(k => `
+      <div class="receipt-line">
+        <span class="receipt-line-name">${order[k].name}</span>
+        <span class="receipt-line-qty">×${order[k].qty}</span>
+        <span class="receipt-line-price">¥${(order[k].price * order[k].qty).toLocaleString()}</span>
+      </div>
+    `).join('');
+    document.getElementById('receiptTotal').textContent = '¥' + total.toLocaleString();
+
+    closeCart();
+    document.getElementById('receiptOverlay').classList.add('open');
+    order = {};
+    renderCart();
+    document.getElementById('cartFab').classList.remove('visible');
+  }
+
+  function closeReceipt() {
+    document.getElementById('receiptOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+</script>
+</body>
+</html>
